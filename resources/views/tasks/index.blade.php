@@ -183,7 +183,11 @@
                         </td>
                         <td>
                             <div class="action-buttons">
-                                <a href="{{ route('tasks.edit', $task) }}" class="btn-action btn-action-edit" title="Edit Task"><i class="bi bi-pencil-square"></i> Edit</a>
+                                <button type="button"
+                                        class="btn btn-sm btn-action btn-action-edit btn-open-task-modal"
+                                        data-task='@json($task)'>
+                                    <i class="bi bi-pencil"></i> Edit
+                                </button>
                                 <form action="{{ route('tasks.destroy', $task) }}" method="POST" style="display:inline;">
                                     @csrf
                                     @method('DELETE')
@@ -218,6 +222,7 @@
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Assigned To</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Start Date</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Due Date</th>
+                                                        <th style="width: 60px; padding: 12px; color: #334155; font-weight: 600;">Links</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Notes</th>
                                                         <th style="width: 60px; padding: 12px; color: #334155; font-weight: 600;">Action</th>
                                                     </tr>
@@ -468,6 +473,91 @@
     </div>
 </div>
 
+{{-- Single modal placed outside the table/loops (near end of file, before @endsection) --}}
+<div class="modal fade" id="taskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <form id="task-modal-form" method="POST" action="#">
+                @csrf
+                @method('PATCH')
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Task</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <input type="hidden" id="task-id" name="id" />
+
+                    <div class="mb-3">
+                        <label for="task-title" class="form-label">Title</label>
+                        <input id="task-title" name="title" class="form-control" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="task-description" class="form-label">Description</label>
+                        <textarea id="task-description" name="description" class="form-control" rows="4"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="task-priority" class="form-label">Priority</label>
+                            <select id="task-priority" name="priority" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="task-status" class="form-label">Status</label>
+                            <select id="task-status" name="status" class="form-select">
+                                <option value="">-- Select --</option>
+                                <option value="not_started">Not Started</option>
+                                <option value="in_progress">In Progress</option>
+                                <option value="review">Review</option>
+                                <option value="hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label for="task-assigned-to" class="form-label">Assigned To</label>
+                            <select id="task-assigned-to" name="assigned_to" class="form-select">
+                                <option value="">-- Select (Optional) --</option>
+                                @foreach($distinctPeople as $person)
+                                    <option value="{{ $person }}">{{ $person }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="task-start" class="form-label">Start Date</label>
+                            <input id="task-start" name="start_date" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="task-due" class="form-label">Due Date</label>
+                            <input id="task-due" name="due_date" type="date" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="task-notes" class="form-label">Notes</label>
+                        <textarea id="task-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
     /* Table Styling */
     .table { background-color: white; }
@@ -590,6 +680,61 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
+    });
+
+    // Helper to safely parse date to yyyy-mm-dd for <input type="date">
+    const toDateInput = (val) => {
+        if (!val) return '';
+        try {
+            // normalize server date strings (ISO or Y-m-d)
+            const d = new Date(val);
+            if (isNaN(d)) return '';
+            return d.toISOString().slice(0,10);
+        } catch (e) { return ''; }
+    };
+
+    const taskModalEl = document.getElementById('taskModal');
+    const bsModal = new bootstrap.Modal(taskModalEl);
+    const form = document.getElementById('task-modal-form');
+
+    // open modal when any .btn-open-task-modal is clicked (delegation)
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.btn-open-task-modal');
+        if (!btn) return;
+
+        const payload = btn.getAttribute('data-task');
+        if (!payload) return console.warn('no task data on button');
+
+        let task;
+        try {
+            task = JSON.parse(payload);
+        } catch (err) {
+            console.error('invalid task JSON', err);
+            return;
+        }
+
+        // populate form fields
+        document.getElementById('task-id').value = task.id ?? '';
+        document.getElementById('task-title').value = task.title ?? '';
+        document.getElementById('task-description').value = task.description ?? '';
+        document.getElementById('task-priority').value = task.priority ?? '';
+        document.getElementById('task-status').value = task.status ?? '';
+        document.getElementById('task-assigned-to').value = task.assigned_to ?? '';
+        document.getElementById('task-start').value = toDateInput(task.start_date ?? task.start) ;
+        document.getElementById('task-due').value = toDateInput(task.due_date ?? task.due);
+        document.getElementById('task-notes').value = task.notes ?? '';
+
+        // set form action to resource update route (adjust if your route differs)
+        form.action = `/tasks/${task.id}`;
+
+        // show modal
+        bsModal.show();
+    });
+
+    // reset form when modal closes
+    taskModalEl.addEventListener('hidden.bs.modal', function () {
+        form.reset();
+        form.action = '#';
     });
 });
 </script>

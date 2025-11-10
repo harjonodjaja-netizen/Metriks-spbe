@@ -20,12 +20,14 @@ class Subtask extends Model
         'due_date',
         'notes',
         'completed',
+        'file_links',
     ];
 
     protected $casts = [
         'start_date' => 'date',
         'due_date' => 'date',
         'completed' => 'boolean',
+        'file_links' => 'array',  // ✅ IMPORTANT
     ];
 
     public function task()

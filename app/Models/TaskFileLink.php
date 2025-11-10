@@ -6,7 +6,14 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaskFileLink extends Model
 {
-    protected $fillable = ['task_id', 'link_name', 'link_url', 'description'];
+    protected $table = 'task_file_links';
+    
+    protected $fillable = [
+        'task_id',
+        'link_name',
+        'link_url',
+        'description',
+    ];
 
     public function task()
     {

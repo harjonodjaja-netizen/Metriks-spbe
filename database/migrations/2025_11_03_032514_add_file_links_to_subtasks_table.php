@@ -6,23 +6,19 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('subtasks', function (Blueprint $table) {
-            //
+            if (!Schema::hasColumn('subtasks', 'file_links')) {
+                $table->json('file_links')->nullable()->after('notes');
+            }
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('subtasks', function (Blueprint $table) {
-            //
+            $table->dropColumn('file_links');
         });
     }
 };
