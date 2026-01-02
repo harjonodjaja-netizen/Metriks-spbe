@@ -85,7 +85,7 @@
                         <!-- Start Date -->
                         <div class="mb-3">
                             <label for="start_date" class="form-label"><strong>Start Date</strong> <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', $task->start_date->format('Y-m-d')) }}" required>
+                            <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', $task->start_date?->format('Y-m-d')) }}" required>
                             @error('start_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -94,7 +94,7 @@
                         <!-- Due Date -->
                         <div class="mb-3">
                             <label for="due_date" class="form-label"><strong>Due Date</strong> <span class="text-danger">*</span></label>
-                            <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date', $task->due_date->format('Y-m-d')) }}" required>
+                            <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date', $task->due_date?->format('Y-m-d')) }}" required>
                             @error('due_date')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -184,7 +184,7 @@
 </div>
 
 <script>
-let linkCount = {{ $task->fileLinks->count() }};
+let linkCount = Math.max({{ $task->fileLinks->count() }}, 1);
 
 function addLink() {
     const container = document.getElementById('fileLinksContainer');

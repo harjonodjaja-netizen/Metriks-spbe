@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container py-4">
+<div class="container-fluid full-bleed py-4">
     <!-- Header Section -->
     <div class="row mb-4">
         <div class="col-12">
@@ -112,9 +112,12 @@
                         <td>{{ $task->id }}</td>
                         <td><strong>{{ $task->task_name }}</strong></td>
                         <td>
-                            <div class="desc-hover" tabindex="0">
+                            <button type="button"
+                                    class="btn btn-link p-0 text-decoration-none text-preview-trigger text-dark"
+                                    data-preview-title="Task Description"
+                                    data-preview-text='@json($task->description ?? "")'>
                                 {{ Str::limit($task->description ?? '', 50) }}
-                            </div>
+                            </button>
                         </td>
                         <td>
                             @if(strtolower($task->priority ?? '') == 'high')
@@ -151,7 +154,7 @@
                                     <ul class="dropdown-menu dropdown-menu-end">
                                         @foreach($task->fileLinks as $link)
                                             <li>
-                                                <a class="dropdown-item" href="{{ $link->link_url }}" target="_blank" title="{{ $link->description ?? '' }}" style="white-space: normal;">
+                                                <a class="dropdown-item" href="{{ $link->link_url }}" target="_blank" rel="noopener noreferrer" title="{{ $link->description ?? '' }}" style="white-space: normal;">
                                                     <i class="bi bi-file-earmark"></i> 
                                                     <strong>{{ $link->link_name }}</strong>
                                                     @if($link->description)
@@ -170,9 +173,12 @@
                             @endif
                         </td>
                         <td>
-                            <div class="note-hover" tabindex="0">
+                            <button type="button"
+                                    class="btn btn-link p-0 text-decoration-none text-preview-trigger text-dark"
+                                    data-preview-title="Task Notes"
+                                    data-preview-text='@json($task->notes ?? "")'>
                                 {{ Str::limit($task->notes ?? '', 30) }}
-                            </div>
+                            </button>
                         </td>
                         <td>
                             <div class="progress" style="height: 20px;">
@@ -201,12 +207,14 @@
                     <tr class="subtask-row" id="subtasks-{{ $task->id }}" style="display: none;">
                         <td colspan="13" class="p-0">
                             <div class="subtask-container" style="background-color: #f8f9fa; border-left: 4px solid #007bff; padding: 15px; margin: 5px;">
-                                <h6 class="mb-3">
-                                    <i class="bi bi-list-check"></i> Subtasks
-                                    <button type="button" class="btn btn-sm btn-primary float-end" data-bs-toggle="modal" data-bs-target="#addSubtaskModal{{ $task->id }}">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="mb-0">
+                                        <i class="bi bi-list-check"></i> Subtasks
+                                    </h6>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addSubtaskModal{{ $task->id }}">
                                         <i class="bi bi-plus"></i> Add Subtask
                                     </button>
-                                </h6>
+                                </div>
 
                                 @if($task->subtasks && $task->subtasks->count() > 0)
                                     <div class="subtask-list">
@@ -214,7 +222,6 @@
                                             <table class="table table-sm table-hover mb-0" style="background-color: #ffffff;">
                                                 <thead style="background: linear-gradient(135deg, #f0f4f8 0%, #e8eef7 100%); border-bottom: 2px solid #cbd5e1;">
                                                     <tr>
-                                                        <th style="width: 40px; padding: 12px; color: #334155; font-weight: 600;"></th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Subtask Name</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Description</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Priority</th>
@@ -222,23 +229,25 @@
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Assigned To</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Start Date</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Due Date</th>
-                                                        <th style="width: 60px; padding: 12px; color: #334155; font-weight: 600;">Links</th>
+                                                        <th style="padding: 12px; color: #334155; font-weight: 600;">Links</th>
                                                         <th style="padding: 12px; color: #334155; font-weight: 600;">Notes</th>
                                                         <th style="width: 60px; padding: 12px; color: #334155; font-weight: 600;">Action</th>
                                                     </tr>
                                                 </thead>
-
-                                                </thead>
                                                 <tbody>
                                                     @foreach($task->subtasks as $subtask)
                                                         <tr style="border-bottom: 1px solid #e2e8f0; transition: all 0.2s ease;">
-                                                            <td style="padding: 12px; vertical-align: middle; background-color: #f8fafc;">
-                                                                <input type="checkbox" class="form-check-input subtask-checkbox" data-subtask-id="{{ $subtask->id }}" {{ $subtask->completed ? 'checked' : '' }}>
-                                                            </td>
-                                                            <td style="padding: 12px; vertical-align: middle;" class="{{ $subtask->completed ? 'text-decoration-line-through text-muted' : '' }}">
+                                                            <td style="padding: 12px; vertical-align: middle;">
                                                                 <strong style="color: #1e293b;">{{ $subtask->subtask_name }}</strong>
                                                             </td>
-                                                            <td style="padding: 12px; vertical-align: middle; color: #64748b;">{{ $subtask->description ? Str::limit($subtask->description, 30) : '-' }}</td>
+                                                            <td style="padding: 12px; vertical-align: middle; color: #64748b;">
+                                                                <button type="button"
+                                                                        class="btn btn-link p-0 text-decoration-none text-preview-trigger text-dark"
+                                                                        data-preview-title="Subtask Description"
+                                                                        data-preview-text='@json($subtask->description ?? "")'>
+                                                                    {{ $subtask->description ? Str::limit($subtask->description, 30) : '-' }}
+                                                                </button>
+                                                            </td>
                                                             <td style="padding: 12px; vertical-align: middle;">
                                                                 @if($subtask->priority == 'High')
                                                                     <span class="badge badge-priority-high"><i class="bi bi-exclamation-circle-fill"></i> High</span>
@@ -264,7 +273,42 @@
                                                             <td style="padding: 12px; vertical-align: middle; color: #64748b;">{{ $subtask->assigned_to ?? '-' }}</td>
                                                             <td style="padding: 12px; vertical-align: middle; color: #64748b;">{{ $subtask->start_date ? \Carbon\Carbon::parse($subtask->start_date)->format('j M Y') : '-' }}</td>
                                                             <td style="padding: 12px; vertical-align: middle; color: #64748b;">{{ $subtask->due_date ? \Carbon\Carbon::parse($subtask->due_date)->format('j M Y') : '-' }}</td>
-                                                            <td style="padding: 12px; vertical-align: middle; color: #64748b;">{{ $subtask->notes ? Str::limit($subtask->notes, 20) : '-' }}</td>
+                                                            <td style="padding: 12px;">
+                                                                @if($subtask->fileLinks && $subtask->fileLinks->count() > 0)
+                                                                    <div class="dropdown" data-bs-popper="static">
+                                                                        <button class="btn btn-sm btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="white-space: nowrap;">
+                                                                            <i class="bi bi-file-earmark"></i>
+                                                                            {{ $subtask->fileLinks->count() }} Link{{ $subtask->fileLinks->count() > 1 ? 's' : '' }}
+                                                                        </button>
+                                                                        <ul class="dropdown-menu dropdown-menu-end">
+                                                                            @foreach($subtask->fileLinks as $link)
+                                                                                <li>
+                                                                                    <a class="dropdown-item" href="{{ $link->link_url }}" target="_blank" rel="noopener noreferrer" title="{{ $link->description ?? '' }}" style="white-space: normal;">
+                                                                                        <i class="bi bi-file-earmark"></i>
+                                                                                        <strong>{{ $link->link_name }}</strong>
+                                                                                        @if($link->description)
+                                                                                            <br><small class="text-muted">{{ Str::limit($link->description, 50) }}</small>
+                                                                                        @endif
+                                                                                    </a>
+                                                                                </li>
+                                                                                @if(!$loop->last)
+                                                                                    <li><hr class="dropdown-divider"></li>
+                                                                                @endif
+                                                                            @endforeach
+                                                                        </ul>
+                                                                    </div>
+                                                                @else
+                                                                    <span class="text-muted">No Links</span>
+                                                                @endif
+                                                            </td>
+                                                            <td style="padding: 12px; vertical-align: middle; color: #64748b;">
+                                                                <button type="button"
+                                                                        class="btn btn-link p-0 text-decoration-none text-preview-trigger text-dark"
+                                                                        data-preview-title="Subtask Notes"
+                                                                        data-preview-text='@json($subtask->notes ?? "")'>
+                                                                    {{ $subtask->notes ? Str::limit($subtask->notes, 20) : '-' }}
+                                                                </button>
+                                                            </td>
                                                             <td style="padding: 12px; vertical-align: middle; text-align: center; background-color: #f8fafc;">
                                                                 <div style="display: flex; gap: 6px; justify-content: center;">
                                                                     <a href="{{ route('subtasks.edit', $subtask) }}" class="btn btn-sm btn-warning" title="Edit" style="padding: 4px 8px;"><i class="bi bi-pencil"></i></a>
@@ -292,12 +336,13 @@
                     <div class="modal fade" id="addSubtaskModal{{ $task->id }}" tabindex="-1">
                         <div class="modal-dialog modal-lg">
                             <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title">Add Subtask to "{{ $task->task_name }}"</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                </div>
-                                <form action="{{ route('subtasks.store', $task) }}" method="POST">
+                                <form action="{{ url('/tasks/'.$task->id.'/subtasks') }}" method="POST">
                                     @csrf
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Add Subtask to "{{ $task->task_name }}"</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+
                                     <div class="modal-body">
                                         <div class="mb-3">
                                             <label class="form-label"><strong>Subtask Name</strong> <span class="text-danger">*</span></label>
@@ -334,18 +379,7 @@
                                             <div class="col-md-6">
                                                 <div class="mb-3">
                                                     <label class="form-label">Assigned To</label>
-                                                    <select name="assigned_to" class="form-select">
-                                                        <option value="">-- Select (Optional) --</option>
-                                                        <option value="{{ $task->assigned_to }}">{{ $task->assigned_to }}</option>
-                                                        @php
-                                                            $distinctPeople = \App\Models\Task::distinct()->pluck('assigned_to')->sort();
-                                                        @endphp
-                                                        @foreach($distinctPeople as $person)
-                                                            @if($person !== $task->assigned_to)
-                                                                <option value="{{ $person }}">{{ $person }}</option>
-                                                            @endif
-                                                        @endforeach
-                                                    </select>
+                                                    <input type="text" name="assigned_to" class="form-control" placeholder="Optional" value="{{ $task->assigned_to }}">
                                                 </div>
                                             </div>
                                         </div>
@@ -363,6 +397,35 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- NEW: File Links (multiple) -->
+                                        <div class="mb-3">
+                                            <label class="form-label"><strong>File Links</strong> <small class="text-muted">Optional</small></label>
+
+                                            <div class="file-links-list">
+                                                <!-- initial single empty row; user can add more -->
+                                                <div class="file-link-row d-flex gap-2 mb-2 align-items-start">
+                                                    <input type="text" name="file_links[][name]" class="form-control" placeholder="Link name (e.g. Spec, Screenshot)">
+                                                    <input type="url" name="file_links[][url]" class="form-control" placeholder="https://example.com">
+                                                    <input type="text" name="file_links[][description]" class="form-control" placeholder="Short description (optional)">
+                                                    <button type="button" class="btn btn-sm btn-danger btn-remove-file-link" title="Remove link">&times;</button>
+                                                </div>
+                                            </div>
+
+                                            <button type="button" class="btn btn-sm btn-outline-secondary mt-2 btn-add-file-link">+ Add Link</button>
+                                            <small class="form-text text-muted d-block mt-1">Add one or more file links for this subtask. Leave blank to skip.</small>
+
+                                            <!-- hidden template -->
+                                            <div class="file-link-template d-none">
+                                                <div class="file-link-row d-flex gap-2 mb-2 align-items-start">
+                                                    <input type="text" name="file_links[][name]" class="form-control" placeholder="Link name">
+                                                    <input type="url" name="file_links[][url]" class="form-control" placeholder="https://example.com">
+                                                    <input type="text" name="file_links[][description]" class="form-control" placeholder="Description (optional)">
+                                                    <button type="button" class="btn btn-sm btn-danger btn-remove-file-link" title="Remove link">&times;</button>
+                                                </div>
+                                            </div>
+                                        </div>
+
                                         <div class="mb-3">
                                             <label class="form-label">Notes</label>
                                             <textarea name="notes" class="form-control" rows="2" placeholder="Optional"></textarea>
@@ -431,7 +494,7 @@
                             <strong>File Links:</strong>
                             <div class="mt-2">
                                 @foreach($task->fileLinks as $link)
-                                    <a href="{{ $link->link_url }}" target="_blank" class="btn btn-sm btn-outline-primary me-2 mb-2">
+                                    <a href="{{ $link->link_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary me-2 mb-2">
                                         <i class="bi bi-file-earmark"></i> {{ $link->link_name }}
                                     </a>
                                 @endforeach
@@ -473,6 +536,21 @@
     </div>
 </div>
 
+{{-- Text Preview Modal (single reusable) --}}
+<div class="modal fade" id="textPreviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="textPreviewTitle">Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <pre id="textPreviewBody" style="white-space: pre-wrap; font-family: inherit; margin: 0;"></pre>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{-- Single modal placed outside the table/loops (near end of file, before @endsection) --}}
 <div class="modal fade" id="taskModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">
@@ -489,8 +567,8 @@
                     <input type="hidden" id="task-id" name="id" />
 
                     <div class="mb-3">
-                        <label for="task-title" class="form-label">Title</label>
-                        <input id="task-title" name="title" class="form-control" />
+                        <label for="task-task-name" class="form-label">Task Name</label>
+                        <input id="task-task-name" name="task_name" class="form-control" />
                     </div>
 
                     <div class="mb-3">
@@ -503,9 +581,9 @@
                             <label for="task-priority" class="form-label">Priority</label>
                             <select id="task-priority" name="priority" class="form-select">
                                 <option value="">-- Select --</option>
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
                             </select>
                         </div>
 
@@ -513,22 +591,17 @@
                             <label for="task-status" class="form-label">Status</label>
                             <select id="task-status" name="status" class="form-select">
                                 <option value="">-- Select --</option>
-                                <option value="not_started">Not Started</option>
-                                <option value="in_progress">In Progress</option>
-                                <option value="review">Review</option>
-                                <option value="hold">On Hold</option>
-                                <option value="completed">Completed</option>
+                                <option value="Not Started">Not Started</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Review">Review</option>
+                                <option value="On Hold">On Hold</option>
+                                <option value="Completed">Completed</option>
                             </select>
                         </div>
 
                         <div class="col-md-4 mb-3">
                             <label for="task-assigned-to" class="form-label">Assigned To</label>
-                            <select id="task-assigned-to" name="assigned_to" class="form-select">
-                                <option value="">-- Select (Optional) --</option>
-                                @foreach($distinctPeople as $person)
-                                    <option value="{{ $person }}">{{ $person }}</option>
-                                @endforeach
-                            </select>
+                            <input id="task-assigned-to" name="assigned_to" class="form-control" />
                         </div>
                     </div>
 
@@ -546,6 +619,19 @@
                     <div class="mb-3">
                         <label for="task-notes" class="form-label">Notes</label>
                         <textarea id="task-notes" name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="task-progress" class="form-label">Progress (%)</label>
+                            <input id="task-progress" name="progress" type="number" min="0" max="100" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">File Links</label>
+                        <div id="task-file-links-list"></div>
+                        <button type="button" class="btn btn-sm btn-outline-secondary" id="task-add-file-link">+ Add Link</button>
                     </div>
                 </div>
 
@@ -574,9 +660,8 @@
     .badge-status-hold { background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); color: #212529; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 20px; }
     .badge-status-not-started { background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); color: white; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 20px; }
     
-    /* Hover Effects */
-    .desc-hover, .note-hover { max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; display: inline-block; background: #fff; padding: 4px 7px; border-radius: 4px; border: 1px solid #e0e0e0; transition: all 0.2s; }
-    .desc-hover:hover, .desc-hover:focus, .note-hover:hover, .note-hover:focus { max-width: 600px; white-space: pre-wrap; background: #f8f9fa; border-color: #007bff; box-shadow: 0 0 8px #b6d4fe; padding: 10px 14px; }
+    /* Preview triggers (no hover-expand) */
+    .text-preview-trigger { max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; text-align: left; }
     
     /* Mobile Displays */
     .desc-display, .notes-display { max-height: 200px; overflow-y: auto; padding: 10px; background-color: #f8f9fa; border-radius: 5px; border: 1px solid #e0e0e0; white-space: pre-wrap; word-wrap: break-word; overflow-wrap: break-word; }
@@ -595,7 +680,6 @@
     @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .subtask-item { transition: all 0.2s ease; }
     .subtask-item:hover { background-color: #f0f0f0 !important; transform: translateX(5px); }
-    .subtask-checkbox { cursor: pointer; min-width: 20px; }
     
     /* Progress Bar */
     .progress { background-color: #e9ecef; border-radius: 10px; overflow: hidden; }
@@ -631,6 +715,24 @@
     .dropdown-item { white-space: normal; padding: 0.75rem 1rem; }
     .dropdown-item i { margin-right: 6px; }
     .dropdown-divider { margin: 0.25rem 0; }
+
+    { 
+    /* make page full-bleed (ignores layout gutters) */
+    .full-bleed {
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+    }
+
+    /* optional: let content inside have some horizontal breathing room */
+    .full-bleed > .row,
+    .full-bleed > .container,
+    .full-bleed .table-responsive {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
 </style>
 @endsection
 
@@ -657,29 +759,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Toggle subtask completion
-    document.querySelectorAll('.subtask-checkbox').forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const subtaskId = this.dataset.subtaskId;
-            
-            fetch(`/subtasks/${subtaskId}/toggle`, {
-                method: 'PATCH',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ completed: this.checked })
-            })
-            .then(response => response.json())
-            .then(data => {
-                const textSpan = this.nextElementSibling;
-                if (data.completed) {
-                    textSpan.classList.add('text-decoration-line-through', 'text-muted');
-                } else {
-                    textSpan.classList.remove('text-decoration-line-through', 'text-muted');
-                }
-            });
-        });
+    // Text preview modal (preserves formatting, safe textContent)
+    const textPreviewModalEl = document.getElementById('textPreviewModal');
+    const textPreviewTitleEl = document.getElementById('textPreviewTitle');
+    const textPreviewBodyEl = document.getElementById('textPreviewBody');
+    const textPreviewModal = textPreviewModalEl ? new bootstrap.Modal(textPreviewModalEl) : null;
+
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.text-preview-trigger');
+        if (!btn || !textPreviewModal) return;
+
+        const raw = btn.getAttribute('data-preview-text') ?? '';
+        const title = btn.getAttribute('data-preview-title') ?? 'Preview';
+
+        let text = '';
+        try {
+            text = JSON.parse(raw);
+        } catch {
+            text = raw;
+        }
+
+        textPreviewTitleEl.textContent = title;
+        textPreviewBodyEl.textContent = text || '';
+        textPreviewModal.show();
     });
 
     // Helper to safely parse date to yyyy-mm-dd for <input type="date">
@@ -715,7 +817,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // populate form fields
         document.getElementById('task-id').value = task.id ?? '';
-        document.getElementById('task-title').value = task.title ?? '';
+        document.getElementById('task-task-name').value = task.task_name ?? '';
         document.getElementById('task-description').value = task.description ?? '';
         document.getElementById('task-priority').value = task.priority ?? '';
         document.getElementById('task-status').value = task.status ?? '';
@@ -723,6 +825,45 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('task-start').value = toDateInput(task.start_date ?? task.start) ;
         document.getElementById('task-due').value = toDateInput(task.due_date ?? task.due);
         document.getElementById('task-notes').value = task.notes ?? '';
+        document.getElementById('task-progress').value = task.progress ?? 0;
+
+        // File links (expects relation serialized as task.file_links)
+        const fileLinksList = document.getElementById('task-file-links-list');
+        const addFileLinkBtn = document.getElementById('task-add-file-link');
+
+        const renderFileLinkRow = (index, link) => {
+            const row = document.createElement('div');
+            row.className = 'row g-2 mb-2 align-items-start';
+            row.innerHTML = `
+                <div class="col-md-4">
+                    <input type="text" name="file_links[${index}][name]" class="form-control" placeholder="Link name" value="${(link?.link_name ?? '').replace(/"/g, '&quot;')}">
+                </div>
+                <div class="col-md-6">
+                    <input type="url" name="file_links[${index}][url]" class="form-control" placeholder="https://example.com" value="${(link?.link_url ?? '').replace(/"/g, '&quot;')}">
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="btn btn-outline-danger btn-sm w-100 task-remove-file-link">Remove</button>
+                </div>
+                <div class="col-md-10">
+                    <textarea name="file_links[${index}][description]" class="form-control" placeholder="Optional description" rows="2">${(link?.description ?? '')}</textarea>
+                </div>
+            `;
+            return row;
+        };
+
+        if (fileLinksList) {
+            fileLinksList.innerHTML = '';
+            const links = Array.isArray(task.file_links) ? task.file_links : [];
+            const initial = links.length ? links : [{}];
+            initial.forEach((link, idx) => fileLinksList.appendChild(renderFileLinkRow(idx, link)));
+
+            if (addFileLinkBtn) {
+                addFileLinkBtn.onclick = function () {
+                    const nextIndex = fileLinksList.querySelectorAll('.row').length;
+                    fileLinksList.appendChild(renderFileLinkRow(nextIndex, {}));
+                };
+            }
+        }
 
         // set form action to resource update route (adjust if your route differs)
         form.action = `/tasks/${task.id}`;
@@ -735,6 +876,50 @@ document.addEventListener('DOMContentLoaded', function() {
     taskModalEl.addEventListener('hidden.bs.modal', function () {
         form.reset();
         form.action = '#';
+
+        const fileLinksList = document.getElementById('task-file-links-list');
+        if (fileLinksList) fileLinksList.innerHTML = '';
+    });
+
+    // Remove file link row (delegated)
+    document.body.addEventListener('click', function (e) {
+        const btn = e.target.closest('.task-remove-file-link');
+        if (!btn) return;
+        const row = btn.closest('.row');
+        if (row) row.remove();
+    });
+
+    document.addEventListener('click', function (e) {
+        // Add new file link row
+        const addBtn = e.target.closest('.btn-add-file-link');
+        if (addBtn) {
+            const modal = addBtn.closest('.modal');
+            if (!modal) return;
+            const list = modal.querySelector('.file-links-list');
+            const tpl = modal.querySelector('.file-link-template .file-link-row');
+            if (!list || !tpl) return;
+            const clone = tpl.cloneNode(true);
+            clone.classList.remove('d-none');
+            list.appendChild(clone);
+            const firstInput = clone.querySelector('input');
+            if (firstInput) firstInput.focus();
+            return;
+        }
+
+        // Remove a file link row
+        const remBtn = e.target.closest('.btn-remove-file-link');
+        if (remBtn) {
+            const row = remBtn.closest('.file-link-row');
+            if (!row) return;
+            // If it's the last row, just clear inputs instead of removing (optional)
+            const parent = row.parentElement;
+            if (parent && parent.querySelectorAll('.file-link-row').length === 1) {
+                row.querySelectorAll('input').forEach(i => i.value = '');
+            } else {
+                row.remove();
+            }
+            return;
+        }
     });
 });
 </script>

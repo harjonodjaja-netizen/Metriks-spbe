@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('subtasks', function (Blueprint $table) {
-            if (!Schema::hasColumn('subtasks', 'file_links')) {
+            if (! Schema::hasColumn('subtasks', 'file_links')) {
                 $table->json('file_links')->nullable()->after('notes');
             }
         });
@@ -18,7 +18,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('subtasks', function (Blueprint $table) {
-            $table->dropColumn('file_links');
+            if (Schema::hasColumn('subtasks', 'file_links')) {
+                $table->dropColumn('file_links');
+            }
         });
     }
 };

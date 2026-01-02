@@ -8,12 +8,26 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (!Schema::hasTable('subtasks')) {
+            return;
+        }
+
         Schema::table('subtasks', function (Blueprint $table) {
-            $table->string('status')->default('Not Started')->after('description');
-            $table->string('assigned_to')->nullable()->after('status');
-            $table->date('start_date')->nullable()->after('assigned_to');
-            $table->date('due_date')->nullable()->after('start_date');
-            $table->text('notes')->nullable()->after('due_date');
+            if (!Schema::hasColumn('subtasks', 'status')) {
+                $table->string('status')->default('Not Started')->after('description');
+            }
+            if (!Schema::hasColumn('subtasks', 'assigned_to')) {
+                $table->string('assigned_to')->nullable()->after('status');
+            }
+            if (!Schema::hasColumn('subtasks', 'start_date')) {
+                $table->date('start_date')->nullable()->after('assigned_to');
+            }
+            if (!Schema::hasColumn('subtasks', 'due_date')) {
+                $table->date('due_date')->nullable()->after('start_date');
+            }
+            if (!Schema::hasColumn('subtasks', 'notes')) {
+                $table->text('notes')->nullable()->after('due_date');
+            }
         });
     }
 

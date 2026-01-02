@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Subtask;
 use App\Models\Task;
 use App\Models\TaskFileLink;
 use Illuminate\Http\Request;
@@ -44,57 +45,67 @@ public function index(Request $request)
     }
 
     // ✅ FIXED: Use with() before paginate()
-    $tasks = $tasks->with('fileLinks')->paginate(15);
+    $tasks = $tasks->with(['fileLinks', 'subtasks' => function($query) {
+        $query->with('fileLinks');  // Eager load fileLinks for subtasks
+    }])->paginate(15);
+
 
     return view('tasks.index', compact('tasks', 'search', 'sortDueDate', 'filterPriority', 'filterStatus'));
 }
 
     public function calendar()
     {
-        $tasks = Task::with(['fileLinks', 'subtasks'])->get(); // ✅ UPDATED: Added fileLinks
-        
-        $events = $tasks->map(function($task) {
-            // Format file links
-            $fileLinksText = '';
-            if ($task->fileLinks->count() > 0) {
-                $fileLinksText = $task->fileLinks->map(fn($link) => $link->link_name)->implode(', ');
-            }
-            
-            return [
-                'id' => $task->id,
-                'title' => $task->task_name,
-                'start' => $task->start_date,
-                'end' => $task->due_date,
-                'type' => 'task',
-                'description' => $task->description ?? 'No description',
-                'priority' => $task->priority,
-                'status' => $task->status,
-                'assigned_to' => $task->assigned_to,
-                'progress' => $task->progress ?? 0,
-                'file_links' => $fileLinksText ?: 'No links',
-                'notes' => $task->notes ?? '',
-            ];
-        });
+        $taskEvents = Task::query()
+            ->with(['fileLinks'])
+            ->get()
+            ->map(function (Task $task) {
+                $fileUrl = $task->fileLinks->first()?->link_url;
 
-        // ✅ ADDED: Include subtask events
-        $subtasks = \App\Models\Subtask::whereNotNull('start_date')->with('task')->get();
-        $subtaskEvents = $subtasks->map(function($subtask) {
-            return [
-                'id' => $subtask->id,
-                'title' => '[SUBTASK] ' . $subtask->subtask_name,
-                'start' => $subtask->start_date,
-                'end' => $subtask->due_date,
-                'type' => 'subtask',
-                'description' => $subtask->description ?? 'No description',
-                'status' => $subtask->status,
-                'assigned_to' => $subtask->assigned_to,
-                'progress' => null,
-                'file_links' => 'N/A',
-                'notes' => $subtask->notes ?? '',
-            ];
-        });
+                return [
+                    'id' => $task->id,
+                    'title' => $task->task_name,
+                    'start' => $task->start_date,
+                    'end' => $task->due_date,
+                    'type' => 'task',
+                    'description' => $task->description ?? 'No description',
+                    'priority' => $task->priority,
+                    'status' => $task->status,
+                    'assigned_to' => $task->assigned_to,
+                    'progress' => $task->progress ?? 0,
+                    'file_links' => $fileUrl,
+                    'notes' => $task->notes ?? '',
+                ];
+            });
 
-        $events = $events->merge($subtaskEvents);
+        $subtaskEvents = Subtask::query()
+            ->where(function ($query) {
+                $query->whereNotNull('start_date')
+                    ->orWhereNotNull('due_date');
+            })
+            ->with(['task', 'fileLinks'])
+            ->get()
+            ->map(function (Subtask $subtask) {
+                $start = $subtask->start_date ?? $subtask->due_date;
+                $end = $subtask->due_date ?? $subtask->start_date ?? $start;
+                $fileUrl = $subtask->fileLinks->first()?->link_url;
+
+                return [
+                    'id' => $subtask->id,
+                    'title' => '[SUBTASK] ' . $subtask->subtask_name,
+                    'start' => $start,
+                    'end' => $end,
+                    'type' => 'subtask',
+                    'description' => $subtask->description ?? 'No description',
+                    'priority' => $subtask->priority,
+                    'status' => $subtask->status,
+                    'assigned_to' => $subtask->assigned_to,
+                    'progress' => null,
+                    'file_links' => $fileUrl,
+                    'notes' => $subtask->notes ?? '',
+                ];
+            });
+
+        $events = $taskEvents->merge($subtaskEvents);
 
         return view('calendar.index', compact('events'));
     }

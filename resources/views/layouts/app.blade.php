@@ -92,6 +92,13 @@
             margin-top: 20px;
         }
 
+        /* Per-page spacing helper (use as needed) */
+        .content-top {
+            margin-top: 20px;
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+
         /* Tombol "Add New Task" */
         .btn-success {
             background-color: var(--secondary-color);
@@ -309,24 +316,22 @@
                             <i class="bi bi-calendar-event"></i> Calendar View
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link {{ request()->routeIs('setup.guide') ? 'active' : '' }}" href="{{ route('setup.guide') }}">
-                            <i class="bi bi-gear"></i> Setup Guide
-                        </a>
-                    </li>
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        <!-- Menampilkan Pesan Sukses -->
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        @endif
+    <!-- Make layout full-bleed; pages control their own padding -->
+    <div class="container-fluid p-0">
+        <!-- Optional small wrapper for notifications / small spacing -->
+        <div class="content-top">
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
+        </div>
 
         @yield('content')
     </div>

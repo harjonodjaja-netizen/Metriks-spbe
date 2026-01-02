@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Subtask extends Model
 {
@@ -20,18 +20,24 @@ class Subtask extends Model
         'due_date',
         'notes',
         'completed',
-        'file_links',
+        'order',
     ];
 
     protected $casts = [
-        'start_date' => 'date',
-        'due_date' => 'date',
+        'start_date' => 'datetime:Y-m-d',
+        'due_date' => 'datetime:Y-m-d',
         'completed' => 'boolean',
-        'file_links' => 'array',  // ✅ IMPORTANT
     ];
 
+    // Relationship to Task
     public function task()
     {
-        return $this->belongsTo(Task::class);
+        return $this->belongsTo(Task::class, 'task_id');
+    }
+
+    // Relationship to file links (NEW!)
+    public function fileLinks()
+    {
+        return $this->hasMany(SubtaskFileLink::class, 'subtask_id');
     }
 }
