@@ -398,6 +398,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 center: 'title',
                 right: 'dayGridMonth,dayGridWeek,dayGridDay'
             },
+            displayEventTime: false,
             events: calendarEvents,
             editable: false,
             selectable: true,

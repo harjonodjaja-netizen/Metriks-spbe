@@ -47,6 +47,7 @@
         .navbar-brand img {
             height: 65px; /* ✅ Diperbesar dari 45px ke 65px */
             width: auto;
+            margin-top: -4px; /* Nudge logo down to better center vertically */
         }
 
         /* ✅ Navbar Items - WIDER TABS */
@@ -272,6 +273,7 @@
             /* ✅ Logo mobile size */
             .navbar-brand img {
                 height: 50px; /* Mobile: 50px */
+                margin-top: -3px; /* Slight nudge on mobile */
             }
 
             /* ✅ Navbar items mobile - reduce padding */
